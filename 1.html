@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机抽数工具</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 配置Tailwind自定义主题 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#10B981',
+            accent: '#F59E0B',
+            dark: '#1E293B',
+            light: '#F8FAFC'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .number-animation {
+        animation: numberChange 0.5s ease-out;
+      }
+      .card-shadow {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .btn-hover {
+        @apply transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1;
+      }
+    }
+    
+    @keyframes numberChange {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-gradient-to-br from-light to-gray-100 min-h-screen text-dark">
+  <!-- 页面容器 -->
+  <div class="container mx-auto px-4 py-8 max-w-5xl">
+    
+    <!-- 标题区域 -->
+    <header class="text-center mb-12 mt-6">
+      <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-primary mb-3 tracking-tight">
+        <i class="fa fa-random mr-3"></i>随机抽数工具
+      </h1>
+      <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+        自定义范围，一键生成随机数，适用于抽奖、选择等多种场景
+      </p>
+    </header>
+    
+    <!-- 主内容区 -->
+    <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- 左侧：设置区域 -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+          <h2 class="text-xl font-bold mb-4 text-dark flex items-center">
+            <i class="fa fa-sliders mr-2 text-primary"></i>抽数设置
+          </h2>
+          
+          <form id="numberForm" class="space-y-5">
+            <!-- 最小值设置 -->
+            <div>
+              <label for="minNum" class="block text-sm font-medium text-gray-700 mb-1">最小值</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                  <i class="fa fa-minus"></i>
+                </span>
+                <input 
+                  type="number" 
+                  id="minNum" 
+                  class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                  value="1"
+                  min="-999999"
+                  max="999998"
+                >
+              </div>
+            </div>
+            
+            <!-- 最大值设置 -->
+            <div>
+              <label for="maxNum" class="block text-sm font-medium text-gray-700 mb-1">最大值</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                  <i class="fa fa-plus"></i>
+                </span>
+                <input 
+                  type="number" 
+                  id="maxNum" 
+                  class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                  value="100"
+                  min="-999998"
+                  max="999999"
+                >
+              </div>
+            </div>
+            
+            <!-- 生成数量 -->
+            <div>
+              <label for="countNum" class="block text-sm font-medium text-gray-700 mb-1">生成数量</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                  <i class="fa fa-list-ol"></i>
+                </span>
+                <input 
+                  type="number" 
+                  id="countNum" 
+                  class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                  value="1"
+                  min="1"
+                  max="20"
+                >
+              </div>
+            </div>
+            
+            <!-- 是否允许重复 -->
+            <div class="flex items-center">
+              <input 
+                type="checkbox" 
+                id="allowDuplicates" 
+                class="w-5 h-5 text-primary focus:ring-primary border-gray-300 rounded"
+                checked
+              >
+              <label for="allowDuplicates" class="ml-2 block text-sm text-gray-700">
+                允许重复数字
+              </label>
+            </div>
+            
+            <!-- 按钮区域 -->
+            <div class="pt-3">
+              <button 
+                type="button" 
+                id="generateBtn" 
+                class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center btn-hover"
+              >
+                <i class="fa fa-refresh mr-2"></i> 生成随机数
+              </button>
+              
+              <button 
+                type="button" 
+                id="clearBtn" 
+                class="w-full mt-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg flex items-center justify-center btn-hover"
+              >
+                <i class="fa fa-trash mr-2"></i> 清空历史
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- 右侧：结果和历史记录 -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- 结果显示区域 -->
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+          <h2 class="text-xl font-bold mb-4 text-dark flex items-center">
+            <i class="fa fa-trophy mr-2 text-accent"></i>抽数结果
+          </h2>
+          
+          <div id="resultContainer" class="min-h-[180px] flex items-center justify-center">
+            <div class="text-center text-gray-400">
+              <i class="fa fa-hand-pointer-o text-4xl mb-3"></i>
+              <p>点击生成按钮开始抽数</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 历史记录 -->
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+          <h2 class="text-xl font-bold mb-4 text-dark flex items-center">
+            <i class="fa fa-history mr-2 text-secondary"></i>历史记录
+          </h2>
+          
+          <div id="historyContainer" class="max-h-[300px] overflow-y-auto pr-2">
+            <div class="text-center text-gray-400 py-10">
+              <p>暂无抽数记录</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="mt-16 text-center text-gray-500 text-sm">
+      <p>© 2023 随机抽数工具 | 一个简单实用的在线随机数生成器</p>
+    </footer>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // 获取DOM元素
+    const minNumInput = document.getElementById('minNum');
+    const maxNumInput = document.getElementById('maxNum');
+    const countNumInput = document.getElementById('countNum');
+    const allowDuplicatesCheckbox = document.getElementById('allowDuplicates');
+    const generateBtn = document.getElementById('generateBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const resultContainer = document.getElementById('resultContainer');
+    const historyContainer = document.getElementById('historyContainer');
+    
+    // 存储历史记录
+    let historyRecords = [];
+    
+    // 生成随机数函数
+    function generateRandomNumbers(min, max, count, allowDuplicates) {
+      const numbers = [];
+      const range = max - min + 1;
+      
+      // 如果不允许重复且数量大于范围，则调整数量
+      if (!allowDuplicates && count > range) {
+        count = range;
+        showNotification(`数量超过范围，已自动调整为 ${range} 个`, 'warning');
+      }
+      
+      // 生成随机数
+      while (numbers.length < count) {
+        const randomNum = Math.floor(Math.random() * range) + min;
+        
+        if (allowDuplicates || !numbers.includes(randomNum)) {
+          numbers.push(randomNum);
+        }
+      }
+      
+      return numbers;
+    }
+    
+    // 显示结果
+    function displayResults(numbers) {
+      // 清空容器
+      resultContainer.innerHTML = '';
+      
+      // 创建结果元素
+      const resultElement = document.createElement('div');
+      resultElement.className = 'w-full text-center';
+      
+      // 添加标题
+      const resultTitle = document.createElement('p');
+      resultTitle.className = 'text-gray-500 mb-4';
+      resultTitle.textContent = `共生成 ${numbers.length} 个随机数`;
+      resultElement.appendChild(resultTitle);
+      
+      // 添加数字
+      const numbersWrapper = document.createElement('div');
+      numbersWrapper.className = 'flex flex-wrap justify-center gap-4';
+      
+      numbers.forEach(num => {
+        const numElement = document.createElement('div');
+        numElement.className = 'number-animation bg-primary/10 text-primary font-bold px-6 py-4 rounded-xl text-[clamp(1.5rem,3vw,2.5rem)] min-w-[80px]';
+        numElement.textContent = num;
+        numbersWrapper.appendChild(numElement);
+      });
+      
+      resultElement.appendChild(numbersWrapper);
+      resultContainer.appendChild(resultElement);
+      
+      // 添加到历史记录
+      addToHistory(numbers);
+    }
+    
+    // 添加到历史记录
+    function addToHistory(numbers) {
+      const timestamp = new Date();
+      const formattedTime = timestamp.toLocaleString();
+      
+      const record = {
+        id: Date.now(),
+        numbers,
+        time: formattedTime,
+        min: parseInt(minNumInput.value),
+        max: parseInt(maxNumInput.value)
+      };
+      
+      historyRecords.unshift(record); // 添加到开头
+      
+      // 限制历史记录数量
+      if (historyRecords.length > 10) {
+        historyRecords.pop();
+      }
+      
+      updateHistoryDisplay();
+    }
+    
+    // 更新历史记录显示
+    function updateHistoryDisplay() {
+      if (historyRecords.length === 0) {
+        historyContainer.innerHTML = `
+          <div class="text-center text-gray-400 py-10">
+            <p>暂无抽数记录</p>
+          </div>
+        `;
+        return;
+      }
+      
+      historyContainer.innerHTML = '';
+      
+      historyRecords.forEach(record => {
+        const recordElement = document.createElement('div');
+        recordElement.className = 'border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0 last:pb-0';
+        
+        // 时间和范围
+        const infoElement = document.createElement('div');
+        infoElement.className = 'flex flex-wrap justify-between items-center mb-2 text-sm text-gray-500';
+        infoElement.innerHTML = `
+          <span>${record.time}</span>
+          <span>范围: ${record.min} - ${record.max}</span>
+        `;
+        
+        // 数字
+        const numbersElement = document.createElement('div');
+        numbersElement.className = 'flex flex-wrap gap-2';
+        
+        record.numbers.forEach(num => {
+          const numSpan = document.createElement('span');
+          numSpan.className = 'bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm';
+          numSpan.textContent = num;
+          numbersElement.appendChild(numSpan);
+        });
+        
+        recordElement.appendChild(infoElement);
+        recordElement.appendChild(numbersElement);
+        historyContainer.appendChild(recordElement);
+      });
+    }
+    
+    // 显示通知
+    function showNotification(message, type = 'info') {
+      // 创建通知元素
+      const notification = document.createElement('div');
+      
+      // 设置样式
+      let bgColor = 'bg-blue-500'; // 默认信息蓝
+      if (type === 'warning') bgColor = 'bg-yellow-500';
+      if (type === 'error') bgColor = 'bg-red-500';
+      if (type === 'success') bgColor = 'bg-green-500';
+      
+      notification.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg fixed top-4 right-4 transform transition-all duration-300 translate-x-full`;
+      notification.textContent = message;
+      
+      // 添加到页面
+      document.body.appendChild(notification);
+      
+      // 显示通知
+      setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+      }, 10);
+      
+      // 3秒后隐藏
+      setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        // 完全隐藏后移除元素
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+    
+    // 验证输入
+    function validateInputs() {
+      const min = parseInt(minNumInput.value);
+      const max = parseInt(maxNumInput.value);
+      const count = parseInt(countNumInput.value);
+      
+      // 检查是否为有效数字
+      if (isNaN(min) || isNaN(max) || isNaN(count)) {
+        showNotification('请输入有效的数字', 'error');
+        return false;
+      }
+      
+      // 检查最小值是否小于等于最大值
+      if (min > max) {
+        showNotification('最小值不能大于最大值', 'error');
+        return false;
+      }
+      
+      // 检查数量是否有效
+      if (count < 1 || count > 20) {
+        showNotification('生成数量必须在1到20之间', 'error');
+        return false;
+      }
+      
+      // 检查不重复时数量是否超过范围
+      if (!allowDuplicatesCheckbox.checked && count > (max - min + 1)) {
+        // 这里只是警告，不阻止生成，但会在生成时调整
+        return true;
+      }
+      
+      return true;
+    }
+    
+    // 生成按钮点击事件
+    generateBtn.addEventListener('click', () => {
+      if (!validateInputs()) return;
+      
+      const min = parseInt(minNumInput.value);
+      const max = parseInt(maxNumInput.value);
+      const count = parseInt(countNumInput.value);
+      const allowDuplicates = allowDuplicatesCheckbox.checked;
+      
+      const randomNumbers = generateRandomNumbers(min, max, count, allowDuplicates);
+      displayResults(randomNumbers);
+      
+      // 添加按钮动画
+      generateBtn.classList.add('scale-95');
+      setTimeout(() => {
+        generateBtn.classList.remove('scale-95');
+      }, 200);
+    });
+    
+    // 清空历史按钮点击事件
+    clearBtn.addEventListener('click', () => {
+      if (historyRecords.length === 0) {
+        showNotification('没有可清空的历史记录', 'info');
+        return;
+      }
+      
+      if (confirm('确定要清空所有历史记录吗？')) {
+        historyRecords = [];
+        updateHistoryDisplay();
+        showNotification('历史记录已清空', 'success');
+      }
+    });
+    
+    // 输入框事件 - 确保最小值不大于最大值
+    minNumInput.addEventListener('change', () => {
+      const min = parseInt(minNumInput.value) || 0;
+      const max = parseInt(maxNumInput.value) || 0;
+      
+      if (min > max) {
+        maxNumInput.value = min;
+      }
+    });
+    
+    // 输入框事件 - 确保最大值不小于最小值
+    maxNumInput.addEventListener('change', () => {
+      const min = parseInt(minNumInput.value) || 0;
+      const max = parseInt(maxNumInput.value) || 0;
+      
+      if (max < min) {
+        minNumInput.value = max;
+      }
+    });
+    
+    // 初始化页面
+    updateHistoryDisplay();
+    
+    // 为输入框添加回车键提交功能
+    [minNumInput, maxNumInput, countNumInput].forEach(input => {
+      input.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          generateBtn.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
